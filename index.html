@@ -311,7 +311,7 @@
         const statusCell = row.cells[3];
         const teamName = row.cells[1].querySelector('.team-display').dataset.value.trim() || "";
         if (teamName !== "") {
-          statusCell.innerText = index < 6 ? "🥇 Qualified" : "💀 Disqualified";
+          statusCell.innerText = index < 6 ? "🎗 Qualified" : "🔴 Disqualified";
         }
         tbody.appendChild(row);
       });
