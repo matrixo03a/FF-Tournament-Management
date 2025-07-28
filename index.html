@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Game Arena Scoreboard</title>
+  <style>
+    body {
+      background: #1b1b1b;
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+      padding: 30px;
+    }
+    .scoreboard {
+      width: 100%;
+      max-width: 900px;
+      margin: auto;
+      background-color: #2e1c16;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #ffc266;
+      font-family: 'Georgia', serif;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    th, td {
+      border: 1px solid #c59b61;
+      padding: 10px;
+    }
+    th {
+      background-color: #c59b61;
+      color: #000;
+      text-align: center;
+    }
+    /* Rank column - kept small */
+    td:nth-child(1) {
+      text-align: center;
+      background-color: rgba(44, 23, 18, 0.95);
+      width: 50px; /* Explicit small width for Rank */
+      min-width: 50px;
+    }
+    /* Team Name column - This TD's padding defines its min visual space */
+    td:nth-child(2) {
+      text-align: left !important;
+      padding-left: 5px; /* MODIFIED: Kept existing padding */
+      background-color: rgba(44, 23, 18, 0.95);
+      cursor: pointer; /* Indicate it's clickable */
+      /* MODIFIED: Remove min-width from TD, let content define it */
+      /* No fixed width, lets the inline-block content and its min-width dictate expansion */
+    }
+    /* Point and Status columns - fixed width */
+    td:nth-child(3), td:nth-child(4) {
+      text-align: center;
+      background-color: rgba(44, 23, 18, 0.95);
+      width: 80px; /* Fixed width for Points */
+      min-width: 80px;
+    }
+
+    /* Style for the team name text when NOT editing */
+    .team-display {
+      font-size: 15px; /* Matching point input font size */
+      font-weight: bold;
+      color: #fff;
+      display: inline-block; /* Crucial for content-based width */
+      min-width: 10px; /* MODIFIED: Very small min-width for display, almost invisible empty state */
+      padding: 0; /* MODIFIED: Remove internal padding */
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1; /* Adjust to better fit padding of cell */
+      vertical-align: middle;
+      height: 15px; /* Ensures consistent height */
+    }
+
+    /* Style for the team name input when editing */
+    input.team {
+      font-size: 15px; /* Matching point input font size */
+      font-weight: bold;
+      color: #fff;
+      background: transparent;
+      border: none;
+      padding: 0; /* MODIFIED: Remove internal padding */
+      margin: 0;
+      text-align: left;
+      box-sizing: content-box;
+      outline: none;
+      box-shadow: none;
+      display: inline-block; /* Crucial for content-based width */
+      vertical-align: middle;
+      white-space: nowrap;
+      min-width: 10px; /* MODIFIED: Very small min-width for input too */
+    }
+    input.point {
+      max-width: 35px; /* Point input's max-width helps define its initial size */
+      background: transparent;
+      border: none;
+      color: #fff;
+      text-align: center;
+      font-size: 15px;
+      outline: none;
+    }
+    .status {
+      font-size: 15px;
+      font-weight: normal;
+      color: #fff;
+      background: #2c1712;
+      user-select: none;
+    }
+    .status[contenteditable="true"]:focus {
+      outline: none;
+    }
+    .buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 25px;
+      background-color: #ffc266;
+      color: black;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 8px;
+      margin: 5px;
+    }
+    .hide-during-save {
+      display: block;
+    }
+    .saving .hide-during-save {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="scoreboard" id="capture-area">
+    <h1>🏆 GAME ARENA 🏆</h1>
+    <table id="scoreTable">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Team</th>
+          <th>Point</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <script>
+          for (let i = 1; i <= 12; i++) {
+            document.write(`<tr>
+              <td class="rank">${i}</td>
+              <td class="team-name-cell">
+                <span class="team-display" data-value=""></span> </td>
+              <td><input type="number" class="point" max="100" min="0"></td>
+              <td class="status" contenteditable="true">Pending</td>
+            </tr>`);
+          }
+        </script>
+      </tbody>
+    </table>
+
+    <div class="buttons hide-during-save">
+      <button onclick="sortByPoints()">⬆️ Sort + Update Status</button>
+      <button onclick="downloadAsImage()">💾 Save</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.team-name-cell').forEach(cell => {
+        const teamDisplaySpan = cell.querySelector('.team-display');
+
+        // Restore team names from data-value if available
+        if (teamDisplaySpan.dataset.value) {
+            teamDisplaySpan.textContent = teamDisplaySpan.dataset.value;
+        }
+
+        cell.addEventListener('click', function() {
+          if (cell.querySelector('input.team')) {
+            return;
+          }
+
+          const currentText = teamDisplaySpan.textContent;
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'team';
+          input.spellcheck = false;
+          input.autocomplete = 'off';
+          input.autocorrect = 'off';
+          input.autocapitalize = 'off';
+          input.value = currentText;
+
+          cell.replaceChild(input, teamDisplaySpan);
+          input.focus();
+          input.select();
+
+          const convertToSpan = () => {
+            const newValue = input.value.trim();
+            teamDisplaySpan.textContent = newValue || '';
+            teamDisplaySpan.dataset.value = newValue;
+            cell.replaceChild(teamDisplaySpan, input);
+          };
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              convertToSpan();
+            }
+          });
+
+          input.addEventListener('blur', () => {
+            convertToSpan();
+          });
+
+          // Dynamic resizing for the input while typing
+          input.addEventListener('input', () => {
+            const tempSpan = document.createElement('span');
+            tempSpan.style.visibility = 'hidden';
+            tempSpan.style.position = 'absolute';
+            tempSpan.style.whiteSpace = 'nowrap';
+            tempSpan.style.fontSize = getComputedStyle(input).fontSize;
+            tempSpan.style.fontWeight = getComputedStyle(input).fontWeight;
+            tempSpan.style.fontFamily = getComputedStyle(input).fontFamily;
+            tempSpan.textContent = input.value || '';
+
+            document.body.appendChild(tempSpan);
+            // Smaller buffer (2px) and extremely small min-width (10px)
+            const newWidth = Math.max(tempSpan.offsetWidth + 2, 10);
+            document.body.removeChild(tempSpan);
+            input.style.width = newWidth + 'px';
+          });
+
+          // Set initial width for the input when it appears
+          const initialTempSpan = document.createElement('span');
+          initialTempSpan.style.visibility = 'hidden';
+          initialTempSpan.style.position = 'absolute';
+          initialTempSpan.style.whiteSpace = 'nowrap';
+          initialTempSpan.style.fontSize = getComputedStyle(input).fontSize;
+          initialTempSpan.style.fontWeight = getComputedStyle(input).fontWeight;
+          initialTempSpan.style.fontFamily = getComputedStyle(input).fontFamily;
+          initialTempSpan.textContent = input.value || '';
+          document.body.appendChild(initialTempSpan);
+          // Set initial width to the new very small min-width
+          input.style.width = Math.max(initialTempSpan.offsetWidth + 2, 10) + 'px';
+          document.body.removeChild(initialTempSpan);
+        });
+      });
+
+      // Initialize all team display spans to be completely empty
+      document.querySelectorAll('.team-display').forEach((span) => {
+          span.textContent = '';
+          span.dataset.value = '';
+      });
+    });
+
+    function sortByPoints() {
+      const table = document.getElementById("scoreTable");
+      const rows = Array.from(table.rows).slice(1);
+      const dataRows = rows.slice(0, 12);
+
+      dataRows.sort((a, b) => {
+        const pointA = parseInt(a.cells[2].querySelector("input").value) || 0;
+        const pointB = parseInt(b.cells[2].querySelector("input").value) || 0;
+        return pointB - pointA;
+      });
+
+      const tbody = table.querySelector("tbody");
+      dataRows.forEach((row, index) => {
+        row.cells[0].textContent = index + 1;
+        const statusCell = row.cells[3];
+        const teamNameElement = row.cells[1].querySelector('.team-display') || row.cells[1].querySelector('input.team');
+        const currentTeamName = teamNameElement ? (teamNameElement.value || teamNameElement.textContent).trim() : '';
+
+        if (statusCell.innerText.trim().toLowerCase() === "pending" || currentTeamName !== "") {
+          statusCell.innerText = index < 6 ? "✅ Qualified" : "❌ Disqualified";
+        }
+        tbody.appendChild(row);
+      });
+    }
+
+    function downloadAsImage() {
+      const body = document.body;
+      const area = document.getElementById('capture-area');
+      body.classList.add('saving');
+
+      document.querySelectorAll('input.team').forEach(input => {
+          const cell = input.closest('.team-name-cell');
+          if (cell) {
+              const teamDisplaySpan = cell.querySelector('.team-display');
+              if (teamDisplaySpan) {
+                  teamDisplaySpan.textContent = input.value;
+                  teamDisplaySpan.dataset.value = input.value;
+                  cell.replaceChild(teamDisplaySpan, input);
+              }
+          }
+      });
+
+      html2canvas(area, {
+        useCORS: true,
+        scale: 2
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'game_arena_scoreboard.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        body.classList.remove('saving');
+      });
+    }
+  </script>
+</body>
+</html>
