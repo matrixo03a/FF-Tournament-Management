@@ -71,30 +71,17 @@
       text-align: center;
     }
 
-    td:nth-child(1) {
-      text-align: center;
+    td:nth-child(1),
+    td:nth-child(2),
+    td:nth-child(3),
+    td:nth-child(4) {
       background-color: rgba(44, 23, 18, 0.95);
-      width: 30px;
-      min-width: 30px;
+      text-align: center;
     }
 
     td:nth-child(2) {
       text-align: left;
-      background-color: rgba(44, 23, 18, 0.95);
       position: relative;
-      width: 90px;
-    }
-
-    td:nth-child(3) {
-      text-align: center;
-      background-color: rgba(44, 23, 18, 0.95);
-      width: 35px;
-    }
-
-    td:nth-child(4) {
-      text-align: center;
-      background-color: rgba(44, 23, 18, 0.95);
-      width: 85px;
     }
 
     .team-display {
@@ -150,13 +137,29 @@
       outline: none;
     }
 
+    /* Updated buttons styling */
     .buttons {
       text-align: center;
       margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px; /* space between button row and telegram button */
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center; /* majhe majhe */
+      gap: 10px;
+      flex-wrap: wrap;
+      max-width: 280px;
+      margin: 0 auto; /* majhe center korar jonno */
+      width: 100%;
     }
 
     button {
-      padding: 8px 18px;
+      flex: 1; /* make buttons equal width */
+      padding: 10px 0;
       background-color: #ffc266;
       color: black;
       border: none;
@@ -164,7 +167,12 @@
       font-weight: bold;
       font-size: 14px;
       border-radius: 6px;
-      margin: 5px 8px;
+      min-width: 120px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #e6b35b;
     }
 
     .hide-during-save {
@@ -174,12 +182,45 @@
     .saving .hide-during-save {
       display: none !important;
     }
+
+    /* Hide Clear All button when saving */
+    .saving .top-controls {
+      display: none !important;
+    }
+
+    .telegram-btn {
+      margin-top: 10px; /* space above telegram button */
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #0088cc;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      text-decoration: none;
+      justify-content: center;
+      min-width: 260px;
+      transition: background-color 0.3s ease;
+    }
+
+    .telegram-btn:hover {
+      background-color: #007ab8;
+    }
+
+    .telegram-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
   </style>
 </head>
 <body>
   <div class="scoreboard" id="capture-area">
     <div class="top-controls">
-      <button onclick="clearAll()">🧹 Clear All</button>
+      <button onclick="clearAll()"> Clear All</button>
     </div>
     <h1>🏆 GAME ARENA 🏆</h1>
     <table id="scoreTable">
@@ -209,8 +250,16 @@
     </table>
 
     <div class="buttons hide-during-save">
-      <button onclick="sortByPoints()">🎖️ Sort + Update</button>
-      <button onclick="downloadAsImage()">📸 Save</button>
+      <div class="button-row">
+        <button onclick="sortByPoints()">Update Rank</button>
+        <button onclick="downloadAsImage()">Save</button>
+      </div>
+      <a class="telegram-btn" href="https://t.me/+lRunfnf5R6QwMTI9" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M9.998 15.435L9.31 20.103c.634 0 .907-.274 1.244-.601l2.982-2.83 6.19 4.509c1.134.625 1.946.297 2.242-1.04L24 3.88c.39-1.563-.561-2.175-1.62-1.79L1.112 9.31C-.416 9.93-.404 10.78.84 11.172l5.334 1.668 12.365-7.788c.58-.39 1.106-.174.672.217"/>
+        </svg>
+        Join Telegram
+      </a>
     </div>
   </div>
 
@@ -308,10 +357,9 @@
       const tbody = table.querySelector("tbody");
       dataRows.forEach((row, index) => {
         row.cells[0].textContent = index + 1;
-        const statusCell = row.cells[3];
         const teamName = row.cells[1].querySelector('.team-display').dataset.value.trim() || "";
         if (teamName !== "") {
-          statusCell.innerText = index < 6 ? "🎗 Qualified" : "🔴 Disqualified";
+          row.cells[3].innerText = index < 6 ? "🎗 Qualified" : "🔴 Disqualified";
         }
         tbody.appendChild(row);
       });
@@ -324,20 +372,19 @@
 
       document.querySelectorAll('input.team').forEach(input => {
         const cell = input.closest('.team-name-cell');
-        if (cell) {
-          const teamDisplaySpan = cell.querySelector('.team-display');
-          if (teamDisplaySpan) {
-            teamDisplaySpan.textContent = input.value;
-            teamDisplaySpan.dataset.value = input.value;
-            input.style.display = 'none';
-            teamDisplaySpan.style.display = 'block';
-          }
+        const span = cell.querySelector('.team-display');
+        if (span) {
+          span.textContent = input.value;
+          span.dataset.value = input.value;
+          input.style.display = 'none';
+          span.style.display = 'block';
         }
       });
 
       html2canvas(document.getElementById('capture-area'), {
         useCORS: true,
-        scale: 2
+        scale: 2,
+        backgroundColor: '#1b1b1b'
       }).then(canvas => {
         const link = document.createElement('a');
         link.download = 'game_arena_scoreboard.png';
