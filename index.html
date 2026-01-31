@@ -148,7 +148,7 @@ button:hover{background:#e6b35b}
   <th>Team Name</th>
   <th class="small">Win</th>
   <th class="small">Kill</th>
-  <th class="small">Pos</th>
+  <th class="small">Point</th> <!-- Changed 'Pos' to 'Point' -->
   <th class="total">Total</th>
 </tr>
 </thead>
@@ -159,10 +159,10 @@ for(let i=1;i<=12;i++){
 document.write(`
 <tr>
   <td class="rank">${i}</td>
-  <td><div class="team-name" contenteditable="true">Team name</div></td>
+  <td><div class="team-name" contenteditable="true"></div></td>
   <td class="small"><input class="win" type="number" min="0"></td>
   <td class="small"><input class="kill" type="number" min="0"></td>
-  <td class="small"><input class="pos" type="number" min="1" max="10"></td>
+  <td class="small"><input class="point" type="number" min="1" max="10"></td> <!-- Changed 'Pos' to 'Point' -->
   <td class="total">0</td>
 </tr>
 `)
@@ -189,79 +189,79 @@ All Rights Reserved. Developed by
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-const posPointMap={1:12,2:9,3:8,4:7,5:6,6:5,7:4,8:3,9:2,10:1}
-
-function calculateTotal(row){
-  const kill=+row.querySelector('.kill').value||0
-  const pos=+row.querySelector('.pos').value||0
-  const total=kill+(posPointMap[pos]||0)
-  row.querySelector('.total').innerText=total
-  return total
+// Modified calculateTotal function for adding Point + Kill directly
+function calculateTotal(row) {
+  const kill = +row.querySelector('.kill').value || 0;
+  const point = +row.querySelector('.point').value || 0; // Changed to 'point' instead of 'pos'
+  // Directly adding Point and Kill
+  const total = kill + point;
+  row.querySelector('.total').innerText = total;
+  return total;
 }
 
-function saveData(){
-  const data=[]
-  document.querySelectorAll('#scoreTable tbody tr').forEach(r=>{
+function saveData() {
+  const data = [];
+  document.querySelectorAll('#scoreTable tbody tr').forEach(r => {
     data.push({
-      team:r.querySelector('.team-name').innerText,
-      win:r.querySelector('.win').value,
-      kill:r.querySelector('.kill').value,
-      pos:r.querySelector('.pos').value
-    })
-  })
-  localStorage.setItem('scoreData',JSON.stringify(data))
+      team: r.querySelector('.team-name').innerText,
+      win: r.querySelector('.win').value,
+      kill: r.querySelector('.kill').value,
+      point: r.querySelector('.point').value // Changed to 'point'
+    });
+  });
+  localStorage.setItem('scoreData', JSON.stringify(data));
 }
 
-function loadData(){
-  const data=JSON.parse(localStorage.getItem('scoreData')||'[]')
-  document.querySelectorAll('#scoreTable tbody tr').forEach((r,i)=>{
-    if(!data[i])return
-    r.querySelector('.team-name').innerText=data[i].team
-    r.querySelector('.win').value=data[i].win
-    r.querySelector('.kill').value=data[i].kill
-    r.querySelector('.pos').value=data[i].pos
-    calculateTotal(r)
-  })
+function loadData() {
+  const data = JSON.parse(localStorage.getItem('scoreData') || '[]');
+  document.querySelectorAll('#scoreTable tbody tr').forEach((r, i) => {
+    if (!data[i]) return;
+    r.querySelector('.team-name').innerText = data[i].team;
+    r.querySelector('.win').value = data[i].win;
+    r.querySelector('.kill').value = data[i].kill;
+    r.querySelector('.point').value = data[i].point; // Changed to 'point'
+    calculateTotal(r);
+  });
 }
 
-function sortByTotal(){
-  const tbody=document.querySelector('#scoreTable tbody')
-  const rows=[...tbody.querySelectorAll('tr')]
-  rows.sort((a,b)=>calculateTotal(b)-calculateTotal(a))
-  rows.forEach((r,i)=>{
-    r.querySelector('.rank').innerText=i+1
-    tbody.appendChild(r)
-  })
-  saveData()
+function sortByTotal() {
+  const tbody = document.querySelector('#scoreTable tbody');
+  const rows = [...tbody.querySelectorAll('tr')];
+  rows.sort((a, b) => calculateTotal(b) - calculateTotal(a));
+  rows.forEach((r, i) => {
+    r.querySelector('.rank').innerText = i + 1;
+    tbody.appendChild(r);
+  });
+  saveData();
 }
 
-document.addEventListener('input',e=>{
-  if(e.target.matches('.team-name,.win,.kill,.pos')){
-    calculateTotal(e.target.closest('tr'))
-    saveData()
+document.addEventListener('input', e => {
+  if (e.target.matches('.team-name,.win,.kill,.point')) { // Changed '.pos' to '.point'
+    calculateTotal(e.target.closest('tr'));
+    saveData();
   }
-})
+});
 
-function clearAll(){
-  localStorage.removeItem('scoreData')
-  location.reload()
+function clearAll() {
+  localStorage.removeItem('scoreData');
+  location.reload();
 }
 
-function downloadAsImage(){
-  document.body.classList.add('saving')
-  html2canvas(document.getElementById('capture-area'),{
-    scale:2,
-    backgroundColor:'#1b1b1b'
-  }).then(c=>{
-    const a=document.createElement('a')
-    a.download='game_arena_scoreboard.png'
-    a.href=c.toDataURL()
-    a.click()
-    document.body.classList.remove('saving')
-  })
+function downloadAsImage() {
+  document.body.classList.add('saving');
+  html2canvas(document.getElementById('capture-area'), {
+    scale: 2,
+    backgroundColor: '#1b1b1b'
+  }).then(c => {
+    const a = document.createElement('a');
+    a.download = 'game_arena_scoreboard.png';
+    a.href = c.toDataURL();
+    a.click();
+    document.body.classList.remove('saving');
+  });
 }
 
-loadData()
+loadData();
 </script>
 
 </body>
