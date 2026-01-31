@@ -1,398 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Game Arena Scoreboard</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #1b1b1b;
-      font-family: 'Arial', sans-serif;
-      color: #fff;
-      -webkit-text-size-adjust: none;
-      overflow-x: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Arena Scoreboard</title>
 
-    body {
-      padding: 20px;
-      scroll-behavior: smooth;
-    }
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  background:#1b1b1b;
+  font-family:Arial,sans-serif;
+  color:#fff;
+}
+body{padding:20px}
 
-    .scoreboard {
-      width: 100%;
-      max-width: 100%;
-      margin: auto;
-      background-color: #2e1c16;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
+.scoreboard{
+  background:#2e1c16;
+  border-radius:12px;
+  padding:15px;
+  box-shadow:0 0 12px rgba(0,0,0,.6)
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #ffc266;
-      font-family: 'Georgia', serif;
-    }
+h1{
+  text-align:center;
+  color:#ffc266;
+  font-family:Georgia,serif;
+  margin-bottom:12px
+}
 
-    .top-controls {
-      text-align: right;
-      margin-bottom: 10px;
-    }
+.top-controls{text-align:right;margin-bottom:10px}
+.top-controls button{
+  background:#ff6666;
+  color:#fff;
+  border:none;
+  padding:6px 14px;
+  border-radius:6px;
+  cursor:pointer
+}
 
-    .top-controls button {
-      padding: 6px 12px;
-      background-color: #ff6666;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-    }
+/* 🔥 horizontal scroll wrapper */
+.table-wrapper{
+  overflow-x:auto;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
+/* table */
+table{
+  width:max-content;        /* 🔑 allow side expand */
+  min-width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
 
-    th, td {
-      border: 2px solid #c59b61;
-      padding: 6px;
-    }
+th,td{
+  border:2px solid #c59b61;
+  padding:6px;
+  text-align:center;
+  white-space:nowrap;
+}
 
-    th {
-      background-color: #c59b61;
-      color: #000;
-      text-align: center;
-    }
+th{
+  background:#c59b61;
+  color:#000;
+  font-weight:bold;
+}
 
-    td:nth-child(1),
-    td:nth-child(2),
-    td:nth-child(3),
-    td:nth-child(4) {
-      background-color: rgba(44, 23, 18, 0.95);
-      text-align: center;
-    }
+td{
+  background:rgba(44,23,18,.95);
+}
 
-    td:nth-child(2) {
-      text-align: left;
-      position: relative;
-    }
+/* column widths */
+th.rank,td.rank{width:40px}
+th.small,td.small{width:50px}
+th.total,td.total{width:60px}
 
-    .team-display {
-      font-size: 14px;
-      font-weight: bold;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
-      display: block;
-      line-height: 1.2;
-      padding-top: 2px;
-      height: 20px;
-    }
+/* team name */
+.team-name{
+  font-size:12px;
+  font-weight:600;
+  padding:2px 6px;
+  outline:none;
+  white-space:nowrap;      /* 🔑 single line */
+}
 
-    input.team {
-      font-size: 14px;
-      font-weight: bold;
-      color: #fff;
-      background: transparent;
-      border: none;
-      padding: 0 2px;
-      width: 100%;
-      outline: none;
-      border-radius: 4px;
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      box-sizing: border-box;
-    }
+/* number input */
+input{
+  background:transparent;
+  border:none;
+  color:#fff;
+  outline:none;
+  font-size:13px;
+  width:40px;
+  text-align:center;
+}
 
-    input.point {
-      max-width: 30px;
-      background: transparent;
-      border: none;
-      color: #fff;
-      text-align: center;
-      font-size: 14px;
-      outline: none;
-      height: 20px;
-    }
+/* buttons */
+.buttons{text-align:center;margin-top:16px}
+.button-row{
+  display:flex;
+  gap:14px;
+  justify-content:center
+}
 
-    .status {
-      font-size: 14px;
-      background: #2c1712;
-      user-select: none;
-    }
+button{
+  background:#ffc266;
+  border:none;
+  padding:10px 18px;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer
+}
+button:hover{background:#e6b35b}
 
-    .status[contenteditable="true"]:focus {
-      outline: none;
-    }
+/* footer */
+.footer{
+  margin-top:14px;
+  text-align:center;
+  font-size:12px;
+  color:#c59b61
+}
+.footer a{
+  color:#ffc266;
+  text-decoration:none;
+  font-weight:bold
+}
 
-    /* Updated buttons styling */
-    .buttons {
-      text-align: center;
-      margin-top: 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px; /* space between button row and telegram button */
-    }
-
-    .button-row {
-      display: flex;
-      justify-content: center; /* majhe majhe */
-      gap: 10px;
-      flex-wrap: wrap;
-      max-width: 280px;
-      margin: 0 auto; /* majhe center korar jonno */
-      width: 100%;
-    }
-
-    button {
-      flex: 1; /* make buttons equal width */
-      padding: 10px 0;
-      background-color: #ffc266;
-      color: black;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-      border-radius: 6px;
-      min-width: 120px;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #e6b35b;
-    }
-
-    .hide-during-save {
-      display: block;
-    }
-
-    .saving .hide-during-save {
-      display: none !important;
-    }
-
-    /* Hide Clear All button when saving */
-    .saving .top-controls {
-      display: none !important;
-    }
-
-    .telegram-btn {
-      margin-top: 10px; /* space above telegram button */
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background-color: #0088cc;
-      color: white;
-      font-weight: bold;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 16px;
-      text-decoration: none;
-      justify-content: center;
-      min-width: 260px;
-      transition: background-color 0.3s ease;
-    }
-
-    .telegram-btn:hover {
-      background-color: #007ab8;
-    }
-
-    .telegram-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: white;
-    }
-  </style>
+.saving .hide-during-save,
+.saving .top-controls{display:none}
+</style>
 </head>
+
 <body>
-  <div class="scoreboard" id="capture-area">
-    <div class="top-controls">
-      <button onclick="clearAll()"> Clear All</button>
-    </div>
-    <h1>🏆 GAME ARENA 🏆</h1>
-    <table id="scoreTable">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Team</th>
-          <th>Point</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <script>
-          for (let i = 1; i <= 12; i++) {
-            document.write(`<tr>
-              <td class="rank">${i}</td>
-              <td class="team-name-cell">
-                <span class="team-display" data-value=""></span>
-                <input type="text" class="team" spellcheck="false" />
-              </td>
-              <td><input type="number" class="point" max="100" min="0"></td>
-              <td class="status" contenteditable="true">Pending..</td>
-            </tr>`);
-          }
-        </script>
-      </tbody>
-    </table>
 
-    <div class="buttons hide-during-save">
-      <div class="button-row">
-        <button onclick="sortByPoints()">Update Rank</button>
-        <button onclick="downloadAsImage()">Save</button>
-      </div>
-      <a class="telegram-btn" href="https://t.me/+lRunfnf5R6QwMTI9" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M9.998 15.435L9.31 20.103c.634 0 .907-.274 1.244-.601l2.982-2.83 6.19 4.509c1.134.625 1.946.297 2.242-1.04L24 3.88c.39-1.563-.561-2.175-1.62-1.79L1.112 9.31C-.416 9.93-.404 10.78.84 11.172l5.334 1.668 12.365-7.788c.58-.39 1.106-.174.672.217"/>
-        </svg>
-        Join Telegram
-      </a>
-    </div>
+<div class="scoreboard" id="capture-area">
+
+<div class="top-controls">
+<button onclick="clearAll()">Clear All</button>
+</div>
+
+<h1>🏆 GAME ARENA 🏆</h1>
+
+<div class="table-wrapper">
+<table id="scoreTable">
+<thead>
+<tr>
+  <th class="rank">Rank</th>
+  <th>Team Name</th>
+  <th class="small">Win</th>
+  <th class="small">Kill</th>
+  <th class="small">Pos</th>
+  <th class="total">Total</th>
+</tr>
+</thead>
+
+<tbody>
+<script>
+for(let i=1;i<=12;i++){
+document.write(`
+<tr>
+  <td class="rank">${i}</td>
+  <td><div class="team-name" contenteditable="true">Team name</div></td>
+  <td class="small"><input class="win" type="number" min="0"></td>
+  <td class="small"><input class="kill" type="number" min="0"></td>
+  <td class="small"><input class="pos" type="number" min="1" max="10"></td>
+  <td class="total">0</td>
+</tr>
+`)
+}
+</script>
+</tbody>
+</table>
+</div>
+
+<div class="buttons hide-during-save">
+  <div class="button-row">
+    <button onclick="sortByTotal()">Update Rank</button>
+    <button onclick="downloadAsImage()">Save</button>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script>
-    const saveToLocalStorage = () => {
-      const data = [];
-      document.querySelectorAll("#scoreTable tbody tr").forEach(row => {
-        const team = row.querySelector('.team-display').dataset.value || '';
-        const point = row.querySelector('.point').value || '';
-        const status = row.querySelector('.status').innerText || '';
-        data.push({ team, point, status });
-      });
-      localStorage.setItem('scoreboardData', JSON.stringify(data));
-    };
+<div class="footer">
+All Rights Reserved. Developed by
+<a href="https://t.me/NeoEchoo" target="_blank">Neo.exe</a>
+</div>
 
-    const loadFromLocalStorage = () => {
-      const data = JSON.parse(localStorage.getItem('scoreboardData') || "[]");
-      if (data.length > 0) {
-        const rows = document.querySelectorAll("#scoreTable tbody tr");
-        rows.forEach((row, i) => {
-          if (data[i]) {
-            const teamSpan = row.querySelector('.team-display');
-            const teamInput = row.querySelector('input.team');
-            teamSpan.textContent = data[i].team;
-            teamSpan.dataset.value = data[i].team;
-            teamInput.value = data[i].team;
-            row.querySelector('.point').value = data[i].point;
-            row.querySelector('.status').innerText = data[i].status;
-          }
-        });
-      }
-    };
+</div>
 
-    const clearAll = () => {
-      localStorage.removeItem('scoreboardData');
-      location.reload();
-    };
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.team-name-cell').forEach(cell => {
-        const span = cell.querySelector('.team-display');
-        const input = cell.querySelector('input.team');
+<script>
+const posPointMap={1:12,2:9,3:8,4:7,5:6,6:5,7:4,8:3,9:2,10:1}
 
-        span.addEventListener('click', () => {
-          span.style.display = 'none';
-          input.style.display = 'block';
-          input.focus();
-          input.select();
-        });
+function calculateTotal(row){
+  const kill=+row.querySelector('.kill').value||0
+  const pos=+row.querySelector('.pos').value||0
+  const total=kill+(posPointMap[pos]||0)
+  row.querySelector('.total').innerText=total
+  return total
+}
 
-        input.addEventListener('keydown', e => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            saveInput();
-          }
-        });
+function saveData(){
+  const data=[]
+  document.querySelectorAll('#scoreTable tbody tr').forEach(r=>{
+    data.push({
+      team:r.querySelector('.team-name').innerText,
+      win:r.querySelector('.win').value,
+      kill:r.querySelector('.kill').value,
+      pos:r.querySelector('.pos').value
+    })
+  })
+  localStorage.setItem('scoreData',JSON.stringify(data))
+}
 
-        input.addEventListener('blur', () => {
-          saveInput();
-        });
+function loadData(){
+  const data=JSON.parse(localStorage.getItem('scoreData')||'[]')
+  document.querySelectorAll('#scoreTable tbody tr').forEach((r,i)=>{
+    if(!data[i])return
+    r.querySelector('.team-name').innerText=data[i].team
+    r.querySelector('.win').value=data[i].win
+    r.querySelector('.kill').value=data[i].kill
+    r.querySelector('.pos').value=data[i].pos
+    calculateTotal(r)
+  })
+}
 
-        function saveInput() {
-          const val = input.value.trim();
-          span.textContent = val;
-          span.dataset.value = val;
-          input.style.display = 'none';
-          span.style.display = 'block';
-          saveToLocalStorage();
-        }
-      });
+function sortByTotal(){
+  const tbody=document.querySelector('#scoreTable tbody')
+  const rows=[...tbody.querySelectorAll('tr')]
+  rows.sort((a,b)=>calculateTotal(b)-calculateTotal(a))
+  rows.forEach((r,i)=>{
+    r.querySelector('.rank').innerText=i+1
+    tbody.appendChild(r)
+  })
+  saveData()
+}
 
-      document.querySelectorAll('.point').forEach(input => {
-        input.addEventListener('input', saveToLocalStorage);
-      });
+document.addEventListener('input',e=>{
+  if(e.target.matches('.team-name,.win,.kill,.pos')){
+    calculateTotal(e.target.closest('tr'))
+    saveData()
+  }
+})
 
-      document.querySelectorAll('.status').forEach(cell => {
-        cell.addEventListener('input', saveToLocalStorage);
-      });
+function clearAll(){
+  localStorage.removeItem('scoreData')
+  location.reload()
+}
 
-      loadFromLocalStorage();
-    });
+function downloadAsImage(){
+  document.body.classList.add('saving')
+  html2canvas(document.getElementById('capture-area'),{
+    scale:2,
+    backgroundColor:'#1b1b1b'
+  }).then(c=>{
+    const a=document.createElement('a')
+    a.download='game_arena_scoreboard.png'
+    a.href=c.toDataURL()
+    a.click()
+    document.body.classList.remove('saving')
+  })
+}
 
-    function sortByPoints() {
-      const table = document.getElementById("scoreTable");
-      const rows = Array.from(table.rows).slice(1);
-      const dataRows = rows.slice(0, 12);
+loadData()
+</script>
 
-      dataRows.sort((a, b) => {
-        const pointA = parseInt(a.cells[2].querySelector("input").value) || 0;
-        const pointB = parseInt(b.cells[2].querySelector("input").value) || 0;
-        return pointB - pointA;
-      });
-
-      const tbody = table.querySelector("tbody");
-      dataRows.forEach((row, index) => {
-        row.cells[0].textContent = index + 1;
-        const teamName = row.cells[1].querySelector('.team-display').dataset.value.trim() || "";
-        if (teamName !== "") {
-          row.cells[3].innerText = index < 6 ? "🎗 Qualified" : "🔴 Disqualified";
-        }
-        tbody.appendChild(row);
-      });
-
-      saveToLocalStorage();
-    }
-
-    function downloadAsImage() {
-      document.body.classList.add('saving');
-
-      document.querySelectorAll('input.team').forEach(input => {
-        const cell = input.closest('.team-name-cell');
-        const span = cell.querySelector('.team-display');
-        if (span) {
-          span.textContent = input.value;
-          span.dataset.value = input.value;
-          input.style.display = 'none';
-          span.style.display = 'block';
-        }
-      });
-
-      html2canvas(document.getElementById('capture-area'), {
-        useCORS: true,
-        scale: 2,
-        backgroundColor: '#1b1b1b'
-      }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'game_arena_scoreboard.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        document.body.classList.remove('saving');
-      });
-    }
-  </script>
 </body>
 </html>
